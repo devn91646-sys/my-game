@@ -3,705 +3,821 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DEV SNAK ARENA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEV VS RAJ - Snake Arena</title>
+
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;color:white;text-align:center;
+ margin:0;
+ padding:10px;
  font-family:Arial,sans-serif;
- background:linear-gradient(135deg,#080820,#071e43,#501080);
+ color:white;
+ text-align:center;
+ background:linear-gradient(135deg,#090979,#00d4ff,#8e2de2,#ff0080);
+ background-size:400% 400%;
+ animation:bg 10s ease infinite;
  min-height:100vh;
 }
-header{padding:18px}
-.logo{
- display:inline-block;font-size:45px;font-weight:1000;
- letter-spacing:9px;color:#00ffff;
- border:3px solid #00ffff;border-radius:15px;
- padding:8px 20px;text-shadow:0 0 20px #00ffff;
+
+@keyframes bg{
+ 0%{background-position:0% 50%}
+ 50%{background-position:100% 50%}
+ 100%{background-position:0% 50%}
 }
+
+h1{
+ font-size:clamp(25px,5vw,42px);
+ text-shadow:0 0 15px cyan;
+ margin:15px 0 5px;
+}
+
 .panel{
- width:96%;max-width:1000px;margin:15px auto;padding:15px;
- background:#101a30;border:2px solid #00eaff;
- border-radius:15px;box-shadow:0 0 20px #00eaff33;
+ background:#101020ee;
+ border:2px solid #00ffff;
+ border-radius:18px;
+ padding:15px;
+ margin:15px auto;
+ max-width:1050px;
+ width:100%;
+ box-shadow:0 0 20px #00ffff55;
 }
+
 input,button{
- padding:12px;margin:5px;border:0;
- border-radius:8px;font-size:15px;
+ padding:12px;
+ margin:5px;
+ border:0;
+ border-radius:9px;
+ font-size:15px;
 }
-input{width:min(90%,350px);text-align:center}
+
+input{
+ width:190px;
+ max-width:90%;
+}
+
 button{
- background:linear-gradient(45deg,#00eaff,#00ff88);
- color:#07101c;font-weight:bold;cursor:pointer;
+ background:linear-gradient(45deg,#00eaff,#00ff77);
+ color:#111;
+ font-weight:bold;
+ cursor:pointer;
 }
-button:disabled{opacity:.4;cursor:not-allowed}
-#roomID{
- color:#00ff99;font-size:34px;
- font-weight:bold;letter-spacing:7px;
+
+button:hover{
+ transform:scale(1.04);
 }
-#status{color:#ffe66d;overflow-wrap:anywhere}
-.players{
- display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+
+#my-id{
+ color:#00ff9d;
+ font-size:25px;
+ font-weight:bold;
 }
-.player{
- background:#202b42;border-radius:10px;padding:10px;
- border:1px solid #52617b;
+
+#status{color:#ffe66d}
+
+.scores{
+ display:flex;
+ justify-content:center;
+ gap:20px;
+ flex-wrap:wrap;
+ margin:10px;
 }
-.player h3{margin:5px;font-size:17px}
-.player strong{font-size:25px}
-#game{
- display:block;width:100%;height:auto;max-width:900px;
- margin:15px auto;background:#10151d;
- border:3px solid #00ffff;border-radius:12px;
- touch-action:none;
+
+.score{
+ background:#202040;
+ border:2px solid #555;
+ border-radius:12px;
+ padding:12px 30px;
+ min-width:150px;
 }
-#message{color:#ffe600;font-weight:bold}
+
+.dev{border-color:#00ff88}
+.raj{border-color:#ff4444}
+
+.score h2{
+ font-size:30px;
+ margin:8px;
+}
+
+.game-area{
+ width:100%;
+ overflow:hidden;
+}
+
+canvas{
+ display:block;
+ width:100%;
+ max-width:900px;
+ height:auto;
+ margin:15px auto;
+ background:#10151d;
+ border:4px solid #00ffff;
+ border-radius:14px;
+ box-shadow:0 0 25px #00ffff88;
+}
+
+#message{
+ color:#ffff00;
+ font-weight:bold;
+ font-size:18px;
+}
+
 .controls{
- display:grid;grid-template-columns:repeat(3,65px);
- justify-content:center;gap:7px;margin:15px;
+ display:grid;
+ grid-template-columns:repeat(3,75px);
+ justify-content:center;
+ gap:8px;
+ margin:18px;
 }
-.controls button{font-size:22px;padding:13px}
+
+.controls button{
+ font-size:25px;
+ padding:14px;
+ touch-action:manipulation;
+}
+
 @media(max-width:600px){
- .players{grid-template-columns:repeat(2,1fr)}
- .logo{font-size:35px}
- .panel{padding:9px}
- #roomID{font-size:28px}
+ body{padding:5px}
+ .panel{padding:8px}
+ .score{min-width:125px;padding:8px}
+ .controls{grid-template-columns:repeat(3,65px)}
+ .controls button{padding:12px}
 }
 </style>
 </head>
 
 <body>
 
-<header>
- <div class="logo">SNAK</div>
- <h1>🐍 DEV SNAK ARENA</h1>
- <p>4 PLAYER ONLINE BATTLE</p>
-</header>
+<h1>🐍 DEV VS RAJ ARENA</h1>
+<p>🔥 2 PLAYER ONLINE SNAKE BATTLE 🔥</p>
 
 <div class="panel">
- <h2>🌐 MULTIPLAYER ROOM</h2>
 
- <p>DEV का 6 DIGIT ROOM PIN</p>
- <div id="roomID">बन रहा है...</div>
+<h3>🌐 PLAY WITH YOUR FRIEND</h3>
 
- <button onclick="copyID()">📋 COPY PIN</button>
+<p>Your Room ID:</p>
+<div id="my-id">Connecting...</div>
 
- <hr>
+<button onclick="copyID()">📋 COPY ID</button>
 
- <h3>JOIN ROOM</h3>
- <input id="joinID" type="text" inputmode="numeric"
- maxlength="6" placeholder="6 Digit PIN डालें">
- <br>
- <button onclick="joinRoom()" id="joinBtn">JOIN GAME</button>
+<br>
 
- <p id="status">Connecting to PeerJS server...</p>
+<input id="join-id" maxlength="6" placeholder="Friend Room ID">
+
+<button onclick="connectFriend()">CONNECT & PLAY</button>
+
+<p id="status">Connecting to server...</p>
+
 </div>
 
 <div class="panel">
- <h2>🏆 LIVE SCOREBOARD</h2>
- <div class="players" id="players"></div>
 
- <canvas id="game" width="800" height="600"></canvas>
+<div class="scores">
 
- <p id="message">Waiting for players...</p>
-
- <button onclick="startGame()">▶ START GAME</button>
- <button onclick="resetGame()">🔄 RESTART</button>
-
- <h3>🎮 CONTROLS</h3>
- <div class="controls">
-  <span></span>
-  <button onclick="move('up')">⬆️</button>
-  <span></span>
-  <button onclick="move('left')">⬅️</button>
-  <button onclick="move('down')">⬇️</button>
-  <button onclick="move('right')">➡️</button>
- </div>
- <p>PC: Arrow Keys / WASD</p>
+<div class="score dev">
+ 🟢 DEV
+ <h2 id="dev-score">0</h2>
+ <small>PLAYER 1</small>
 </div>
 
-<footer>⚡ DEV × RAJ × MAYANK × ROHIT ⚡</footer>
+<div class="score raj">
+ 🔴 RAJ
+ <h2 id="raj-score">0</h2>
+ <small>PLAYER 2</small>
+</div>
+
+</div>
+
+<div class="game-area">
+<canvas id="game" width="900" height="600"></canvas>
+</div>
+
+<p id="message">Connect with your friend to play!</p>
+
+<button onclick="startGame()">▶ START GAME</button>
+<button onclick="resetGame()">🔄 RESTART</button>
+
+<h3>🎮 GAME CONTROLS</h3>
+
+<div class="controls">
+
+<span></span>
+<button onclick="move('up')">⬆️</button>
+<span></span>
+
+<button onclick="move('left')">⬅️</button>
+<button onclick="move('down')">⬇️</button>
+<button onclick="move('right')">➡️</button>
+
+</div>
+
+<p>PC: Arrow Keys / WASD</p>
+<p>Mobile: Use the buttons above</p>
+
+</div>
+
+<p>🌈 DEV VS RAJ SNAKE ARENA</p>
 
 <script>
-const $=id=>document.getElementById(id);
-const canvas=$("game");
+
+const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-const SIZE=20,COLS=40,ROWS=30;
-const PREFIX="dev-snak-";
+const SIZE=30;
+const COLS=30;
+const ROWS=20;
 
-const NAMES=["DEV","RAJ","MAYANK","ROHIT"];
-const COLORS=["#00ff99","#ff5555","#55aaff","#ffcc44"];
+let peer;
+let conn=null;
+let isHost=false;
+let gameRunning=false;
+let timer=null;
+let speed=100;
 
-const STARTS=[
- {x:5,y:5,d:"right"},
- {x:34,y:5,d:"left"},
- {x:5,y:24,d:"right"},
- {x:34,y:24,d:"left"}
+let snake=[];
+let enemy=[];
+
+let direction="right";
+let nextDirection="right";
+
+let food={x:15,y:10};
+
+let myScore=0;
+let enemyScore=0;
+let foodNumber=0;
+
+const COLORS=[
+ "#00ff88","#00eaff","#00ff77",
+ "#00d9ff","#a855f7","#ffffff"
 ];
 
-let peer=null;
-let host=false;
-let mySlot=-1;
-let myConn=null;
-let hostPin="";
+function newSnake(host){
 
-let connections={};
-let players=[];
-let food={x:20,y:15};
+ if(host){
+  return [
+   {x:5,y:5},
+   {x:4,y:5},
+   {x:3,y:5}
+  ];
+ }
 
-let running=false;
-let timer=null;
-let roomReady=false;
-let joining=false;
-
-function makePlayer(i,connected){
- let s=STARTS[i];
- let dx=s.d==="right"?1:-1;
-
- return {
-  id:i,name:NAMES[i],color:COLORS[i],
-  connected,alive:true,score:0,
-  direction:s.d,nextDirection:s.d,
-  snake:[
-   {x:s.x,y:s.y},
-   {x:s.x-dx,y:s.y},
-   {x:s.x-2*dx,y:s.y}
-  ]
- };
-}
-
-function resetPlayers(){
- players=STARTS.map((s,i)=>makePlayer(i,i===0));
+ return [
+  {x:24,y:14},
+  {x:25,y:14},
+  {x:26,y:14}
+ ];
 }
 
 function randomFood(){
- let p,attempts=0;
+
+ let p;
+
  do{
   p={
    x:Math.floor(Math.random()*COLS),
    y:Math.floor(Math.random()*ROWS)
   };
-  attempts++;
+
  }while(
-  players.some(pl=>pl.connected&&
-   pl.snake.some(s=>s.x===p.x&&s.y===p.y))
-  &&attempts<2000
+  snake.some(s=>s.x===p.x&&s.y===p.y) ||
+  enemy.some(s=>s.x===p.x&&s.y===p.y)
  );
+
  return p;
 }
 
-function status(msg){
- $("status").innerText=msg;
-}
+function sendData(data){
 
-function send(c,data){
- if(c&&c.open){
-  c.send(data);
+ if(conn && conn.open){
+  conn.send(data);
  }
 }
 
-function broadcast(data){
- Object.values(connections).forEach(c=>send(c,data));
-}
+function initPeer(){
 
-function state(){
- return {type:"state",players,food,running};
-}
+ const id=String(
+  Math.floor(100000+Math.random()*900000)
+ );
 
-function broadcastState(){
- broadcast(state());
- render();
-}
+ peer=new Peer(id);
 
-// HOST PIN GENERATOR
-function generatePin(){
- return String(Math.floor(100000+Math.random()*900000));
-}
+ peer.on("open",id=>{
 
-// HOST CREATION
-function initHost(){
+  document.getElementById("my-id").innerText=id;
 
- host=true;
- mySlot=0;
- hostPin=generatePin();
+  document.getElementById("status").innerText=
+   "🟢 Ready! Share your Room ID.";
 
- resetPlayers();
- food=randomFood();
-
- $("roomID").innerText="बन रहा है...";
- status("Creating your room...");
-
- peer=new Peer(PREFIX+hostPin);
-
- peer.on("open",()=>{
-  roomReady=true;
-  $("roomID").innerText=hostPin;
-  status("🟢 ROOM READY! Friends को 6 digit PIN भेजें।");
-  render();
  });
 
- peer.on("connection",c=>{
-  console.log("New connection received");
+ peer.on("connection",connection=>{
 
-  c.on("data",data=>{
-   if(!data||typeof data!=="object")return;
-
-   if(data.type==="join"){
-    handleJoin(c);
-    return;
-   }
-
-   let slot=c.playerSlot;
-   if(slot===undefined)return;
-
-   if(data.type==="input"){
-    setDirection(slot,data.direction);
-   }
-
-   if(data.type==="start"){
-    startAsHost();
-   }
-
-   if(data.type==="restart"){
-    resetAsHost();
-   }
-  });
-
-  c.on("close",()=>{
-   let slot=c.playerSlot;
-   if(slot!==undefined){
-    delete connections[slot];
-
-    if(players[slot]){
-     players[slot].connected=false;
-     players[slot].alive=false;
-    }
-
-    status(NAMES[slot]+" disconnected.");
-    broadcastState();
-   }
-  });
-
-  c.on("error",err=>{
-   console.log("Connection error",err);
-  });
- });
-
- peer.on("error",err=>{
-  console.log("Host error:",err);
-
-  if(err.type==="unavailable-id"){
-   status("PIN पहले से इस्तेमाल है। नया PIN बना रहे हैं...");
-   roomReady=false;
-   peer.destroy();
-   setTimeout(initHost,700);
+  if(conn){
+   connection.close();
    return;
   }
 
-  status("Host error: "+err.type);
- });
-}
+  conn=connection;
+  isHost=true;
 
-// PLAYER JOIN HANDLER
-function handleJoin(c){
+  setupConnection();
 
- if(c.playerSlot!==undefined)return;
-
- let slot=players.findIndex((p,i)=>i>0&&!p.connected);
-
- if(slot===-1){
-  send(c,{type:"full"});
-  c.close();
-  return;
- }
-
- players[slot]=makePlayer(slot,true);
- c.playerSlot=slot;
- connections[slot]=c;
-
- send(c,{
-  type:"welcome",
-  slot,
-  players,
-  food,
-  running
- });
-
- status(NAMES[slot]+" joined! "+connectedCount()+"/4 players");
- broadcastState();
-}
-
-function connectedCount(){
- return players.filter(p=>p.connected).length;
-}
-
-// JOIN ROOM WITH SIX DIGIT PIN
-function joinRoom(){
-
- if(peer){
-  alert("आप पहले से किसी Room से जुड़े हैं!");
-  return;
- }
-
- let pin=$("joinID").value.trim();
-
- if(!/^\d{6}$/.test(pin)){
-  alert("कृपया 6 अंकों का PIN डालें!");
-  return;
- }
-
- joining=true;
- $("joinBtn").disabled=true;
- status("Connecting to DEV's room...");
-
- host=false;
- peer=new Peer();
-
- peer.on("open",()=>{
-  myConn=peer.connect(PREFIX+pin,{reliable:true});
-
-  myConn.on("open",()=>{
-   status("Connected! Requesting player slot...");
-   send(myConn,{type:"join"});
-  });
-
-  myConn.on("data",data=>{
-   if(!data||typeof data!=="object")return;
-
-   if(data.type==="full"){
-    status("❌ Room full! Maximum 4 players.");
-    myConn.close();
-    return;
-   }
-
-   if(data.type==="welcome"){
-    mySlot=data.slot;
-    players=data.players;
-    food=data.food;
-    running=data.running;
-
-    $("message").innerText="Welcome "+NAMES[mySlot]+"!";
-    status("🟢 Joined successfully as "+NAMES[mySlot]);
-    $("joinBtn").disabled=true;
-    render();
-   }
-
-   if(data.type==="state"){
-    players=data.players;
-    food=data.food;
-    running=data.running;
-    render();
-   }
-  });
-
-  myConn.on("close",()=>{
-   running=false;
-   mySlot=-1;
-   status("🔴 Host disconnected.");
-   $("message").innerText="Room disconnected.";
-   $("joinBtn").disabled=false;
-   joining=false;
-  });
-
-  myConn.on("error",err=>{
-   status("Connection error: "+err.type);
-   $("joinBtn").disabled=false;
-   joining=false;
-  });
  });
 
  peer.on("error",err=>{
-  console.log(err);
-  status("Peer error: "+err.type);
-  $("joinBtn").disabled=false;
-  joining=false;
+
+  if(err.type==="unavailable-id"){
+   initPeer();
+  }else{
+   document.getElementById("status").innerText=
+    "Connection error: "+err.type;
+  }
+
  });
 
 }
 
-// MOVEMENT
-function setDirection(slot,d){
+function connectFriend(){
 
- let p=players[slot];
- if(!p||!p.alive)return;
+ const id=document.getElementById("join-id").value.trim();
 
- const opposite={
-  up:"down",down:"up",
-  left:"right",right:"left"
- };
-
- if(!opposite[d])return;
-
- if(opposite[d]!==p.direction){
-  p.nextDirection=d;
+ if(!/^\d{6}$/.test(id)){
+  alert("Enter a valid 6 digit Room ID!");
+  return;
  }
+
+ if(id===document.getElementById("my-id").innerText){
+  alert("You cannot join your own room!");
+  return;
+ }
+
+ if(conn){
+  alert("Already connected!");
+  return;
+ }
+
+ conn=peer.connect(id);
+
+ isHost=false;
+
+ setupConnection();
+
+}
+
+function setupConnection(){
+
+ document.getElementById("status").innerText=
+  "Connecting...";
+
+ conn.on("open",()=>{
+
+  document.getElementById("status").innerText=
+   "🟢 FRIEND CONNECTED!";
+
+  document.getElementById("message").innerText=
+   "Both players are ready!";
+
+  if(isHost){
+
+   sendData({
+    type:"initial",
+    snake:snake,
+    food:food,
+    score:myScore
+   });
+
+  }else{
+
+   sendData({type:"request"});
+
+  }
+
+ });
+
+ conn.on("data",data=>{
+
+  if(data.type==="initial" && !isHost){
+
+   enemy=data.snake;
+   food=data.food;
+   enemyScore=data.score||0;
+
+   updateScores();
+   draw();
+
+  }
+
+  if(data.type==="state"){
+
+   enemy=data.snake;
+   enemyScore=data.score;
+
+   updateScores();
+   draw();
+
+  }
+
+  if(data.type==="eat" && isHost){
+
+   food=randomFood();
+   foodNumber++;
+
+   sendData({
+    type:"food",
+    food:food,
+    foodNumber:foodNumber
+   });
+
+  }
+
+  if(data.type==="food"){
+
+   food=data.food;
+   foodNumber=data.foodNumber;
+
+   draw();
+
+  }
+
+  if(data.type==="request" && isHost){
+
+   sendData({
+    type:"initial",
+    snake:snake,
+    food:food,
+    score:myScore
+   });
+
+  }
+
+  if(data.type==="restart"){
+
+   resetGame(false);
+
+  }
+
+  if(data.type==="gameover"){
+
+   gameRunning=false;
+   clearInterval(timer);
+
+   document.getElementById("message").innerText=
+    data.message;
+
+  }
+
+ });
+
+ conn.on("close",()=>{
+
+  document.getElementById("status").innerText=
+   "🔴 Friend Disconnected";
+
+  conn=null;
+  gameRunning=false;
+
+  clearInterval(timer);
+
+ });
+
+}
+
+function copyID(){
+
+ const id=document.getElementById("my-id").innerText;
+
+ if(id!=="Connecting..."){
+
+  navigator.clipboard.writeText(id)
+   .then(()=>alert("Room ID Copied!"))
+   .catch(()=>prompt("Copy your Room ID:",id));
+
+ }
+
 }
 
 function move(d){
 
- if(mySlot===-1){
-  $("message").innerText="Join a room first!";
-  return;
+ const opposite={
+  up:"down",
+  down:"up",
+  left:"right",
+  right:"left"
+ };
+
+ if(opposite[d]!==direction){
+  nextDirection=d;
  }
 
- if(host){
-  setDirection(mySlot,d);
- }else{
-  send(myConn,{type:"input",direction:d});
- }
 }
 
 document.addEventListener("keydown",e=>{
+
  const keys={
-  ArrowUp:"up",ArrowDown:"down",
-  ArrowLeft:"left",ArrowRight:"right",
-  w:"up",W:"up",s:"down",S:"down",
-  a:"left",A:"left",d:"right",D:"right"
+  ArrowUp:"up",
+  ArrowDown:"down",
+  ArrowLeft:"left",
+  ArrowRight:"right",
+  w:"up",
+  s:"down",
+  a:"left",
+  d:"right"
  };
 
  if(keys[e.key]){
+
   e.preventDefault();
   move(keys[e.key]);
+
  }
+
 });
 
-// START GAME
+function updateScores(){
+
+ const devScore=isHost?myScore:enemyScore;
+ const rajScore=isHost?enemyScore:myScore;
+
+ document.getElementById("dev-score").innerText=devScore;
+ document.getElementById("raj-score").innerText=rajScore;
+
+}
+
 function startGame(){
 
- if(mySlot===-1){
-  alert("पहले Room JOIN करें!");
+ if(!conn || !conn.open){
+
+  document.getElementById("message").innerText=
+   "First connect with your friend!";
+
   return;
+
  }
 
- if(host){
-  startAsHost();
- }else{
-  send(myConn,{type:"start"});
-  $("message").innerText="Start request sent to DEV!";
- }
+ if(gameRunning)return;
+
+ gameRunning=true;
+
+ document.getElementById("message").innerText=
+  "🔥 DEV VS RAJ GAME STARTED!";
+
+ timer=setInterval(update,speed);
+
 }
 
-function startAsHost(){
-
- if(!host||running)return;
-
- if(connectedCount()<2){
-  $("message").innerText="At least 2 players needed!";
-  return;
- }
-
- running=true;
- $("message").innerText="🔥 GAME STARTED!";
-
- timer=setInterval(updateGame,120);
- broadcastState();
-}
-
-// RESTART
-function resetGame(){
-
- if(mySlot===-1)return;
-
- if(host){
-  resetAsHost();
- }else{
-  send(myConn,{type:"restart"});
- }
-}
-
-function resetAsHost(){
-
- if(!host)return;
+function resetGame(send=true){
 
  clearInterval(timer);
- running=false;
 
- let connected=players.map(p=>p.connected);
- resetPlayers();
+ gameRunning=false;
 
- for(let i=1;i<4;i++){
-  if(connected[i]){
-   players[i].connected=true;
-  }
+ snake=newSnake(isHost);
+
+ enemy=newSnake(!isHost);
+
+ direction=isHost?"right":"left";
+ nextDirection=direction;
+
+ myScore=0;
+ enemyScore=0;
+
+ if(isHost){
+  food=randomFood();
+  foodNumber++;
  }
 
- food=randomFood();
- $("message").innerText="Ready! Press START GAME.";
- broadcastState();
-}
+ updateScores();
 
-// HOST GAME LOOP
-function updateGame(){
+ document.getElementById("message").innerText=
+  "Ready to play!";
 
- if(!host||!running)return;
+ if(send){
 
- let moves=[];
+  sendData({type:"restart"});
 
- players.forEach(p=>{
-  if(!p.connected||!p.alive)return;
+  if(isHost){
 
-  p.direction=p.nextDirection;
-  let h={...p.snake[0]};
+   sendData({
+    type:"initial",
+    snake:snake,
+    food:food,
+    score:myScore
+   });
 
-  if(p.direction==="up")h.y--;
-  if(p.direction==="down")h.y++;
-  if(p.direction==="left")h.x--;
-  if(p.direction==="right")h.x++;
-
-  moves.push({p,h});
- });
-
- let dead=new Set();
-
- moves.forEach(({p,h})=>{
-
-  if(h.x<0||h.x>=COLS||h.y<0||h.y>=ROWS){
-   dead.add(p.id);
-   return;
   }
 
-  if(p.snake.slice(1).some(s=>s.x===h.x&&s.y===h.y)){
-   dead.add(p.id);
-  }
-
-  players.forEach(other=>{
-   if(other===p||!other.connected||!other.alive)return;
-
-   if(other.snake.some(s=>s.x===h.x&&s.y===h.y)){
-    dead.add(p.id);
-   }
-  });
- });
-
- let ate=false;
-
- moves.forEach(({p,h})=>{
-
-  if(dead.has(p.id)){
-   p.alive=false;
-   return;
-  }
-
-  p.snake.unshift(h);
-
-  if(!ate&&h.x===food.x&&h.y===food.y){
-   p.score+=10;
-   ate=true;
-  }else{
-   p.snake.pop();
-  }
- });
-
- if(ate)food=randomFood();
-
- let alive=players.filter(p=>p.connected&&p.alive);
-
- if(alive.length<=1){
-  running=false;
-  clearInterval(timer);
-
-  $("message").innerText=alive.length?
-   "🏆 WINNER: "+alive[0].name:"GAME OVER!";
  }
-
- broadcastState();
-}
-
-// DISPLAY
-function render(){
 
  draw();
 
- let box=$("players");
- box.innerHTML="";
+}
 
- NAMES.forEach((name,i)=>{
+function update(){
 
-  let p=players[i];
-  let connected=p&&p.connected;
-  let alive=connected&&p.alive;
+ if(!gameRunning)return;
 
-  let div=document.createElement("div");
-  div.className="player";
+ direction=nextDirection;
 
-  let h=document.createElement("h3");
-  h.style.color=COLORS[i];
-  h.innerText=name;
+ let head={...snake[0]};
 
-  let score=document.createElement("strong");
-  score.innerText=p?p.score:0;
+ if(direction==="up")head.y--;
+ if(direction==="down")head.y++;
+ if(direction==="left")head.x--;
+ if(direction==="right")head.x++;
 
-  let label=document.createElement("p");
-  label.innerText=!connected?"WAITING":!alive?"OUT":"PLAYING";
+ if(
+  head.x<0 ||
+  head.x>=COLS ||
+  head.y<0 ||
+  head.y>=ROWS ||
+  snake.some((s,i)=>
+   i>0&&s.x===head.x&&s.y===head.y
+  )
+ ){
 
-  div.append(h,score,label);
-  box.appendChild(div);
+  endGame(
+   isHost?
+   "DEV CRASHED! RAJ WINS!":
+   "RAJ CRASHED! DEV WINS!"
+  );
+
+  return;
+
+ }
+
+ snake.unshift(head);
+
+ if(head.x===food.x && head.y===food.y){
+
+  myScore+=10;
+
+  if(isHost){
+
+   food=randomFood();
+   foodNumber++;
+
+   sendData({
+    type:"food",
+    food:food,
+    foodNumber:foodNumber
+   });
+
+  }else{
+
+   sendData({type:"eat"});
+
+  }
+
+ }else{
+
+  snake.pop();
+
+ }
+
+ updateScores();
+
+ sendData({
+  type:"state",
+  snake:snake,
+  score:myScore
  });
+
+ draw();
+
+}
+
+function endGame(msg){
+
+ gameRunning=false;
+
+ clearInterval(timer);
+
+ document.getElementById("message").innerText=
+  "🏆 "+msg;
+
+ sendData({
+  type:"gameover",
+  message:msg
+ });
+
 }
 
 function draw(){
 
- ctx.clearRect(0,0,800,600);
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ // Background grid
 
  for(let y=0;y<ROWS;y++){
+
   for(let x=0;x<COLS;x++){
-   ctx.fillStyle=(x+y)%2===0?"#182333":"#202b3b";
-   ctx.fillRect(x*SIZE,y*SIZE,SIZE,SIZE);
+
+   ctx.fillStyle=(x+y)%2===0?
+    "#182333":"#202b3b";
+
+   ctx.fillRect(
+    x*SIZE,
+    y*SIZE,
+    SIZE,
+    SIZE
+   );
+
   }
+
  }
+
+ // Food
 
  ctx.fillStyle="#ff3030";
  ctx.shadowColor="#ff0000";
- ctx.shadowBlur=18;
+ ctx.shadowBlur=20;
 
  ctx.beginPath();
- ctx.arc(food.x*SIZE+10,food.y*SIZE+10,8,0,Math.PI*2);
+
+ ctx.arc(
+  food.x*SIZE+15,
+  food.y*SIZE+15,
+  12,
+  0,
+  Math.PI*2
+ );
+
  ctx.fill();
+
  ctx.shadowBlur=0;
 
- players.forEach(p=>{
-  if(!p||!p.connected)return;
+ // My snake
 
-  p.snake.forEach((s,i)=>{
-   ctx.fillStyle=i===0?"white":p.color;
-   ctx.fillRect(s.x*SIZE+1,s.y*SIZE+1,18,18);
-  });
+ snake.forEach((s,i)=>{
 
-  if(p.snake.length){
-   ctx.font="bold 12px Arial";
-   ctx.fillStyle=p.color;
-   ctx.fillText(p.name,p.snake[0].x*SIZE,p.snake[0].y*SIZE-5);
-  }
+  ctx.fillStyle=i===0?"#00ff88":COLORS[i%COLORS.length];
+
+  ctx.fillRect(
+   s.x*SIZE+2,
+   s.y*SIZE+2,
+   26,
+   26
+  );
+
  });
-}
 
-// COPY PIN
-async function copyID(){
+ // Friend snake
 
- let id=hostPin;
+ enemy.forEach((s,i)=>{
 
- if(!roomReady||!id){
-  alert("Room PIN बनने का इंतजार करें!");
-  return;
+  ctx.fillStyle=i===0?"#ff3333":"#ff8800";
+
+  ctx.fillRect(
+   s.x*SIZE+2,
+   s.y*SIZE+2,
+   26,
+   26
+  );
+
+ });
+
+ // Player names
+
+ ctx.font="bold 16px Arial";
+
+ ctx.textAlign="left";
+
+ if(snake.length){
+
+  ctx.fillStyle="#00ff88";
+
+  ctx.fillText(
+   isHost?"DEV":"RAJ",
+   snake[0].x*SIZE,
+   snake[0].y*SIZE-5
+  );
+
  }
 
- try{
-  await navigator.clipboard.writeText(id);
-  alert("6 Digit PIN Copied: "+id);
- }catch(e){
-  prompt("Copy your Room PIN:",id);
+ if(enemy.length){
+
+  ctx.fillStyle="#ff5555";
+
+  ctx.fillText(
+   isHost?"RAJ":"DEV",
+   enemy[0].x*SIZE,
+   enemy[0].y*SIZE-5
+  );
+
  }
+
 }
 
-// INITIALIZE
-resetPlayers();
-food=randomFood();
-render();
-initHost();
+snake=newSnake(true);
+enemy=newSnake(false);
+
+draw();
+initPeer();
 
 </script>
+
 </body>
 </html>
